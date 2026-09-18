@@ -39,7 +39,7 @@ header{
   border-bottom:1px solid var(--line-soft)
 }
 header:before{
-  content:"iGrant";
+  content:"KAIZEN";
   display:block;
   color:var(--cyan);
   font-weight:900;
@@ -192,7 +192,7 @@ footer{display:none}
 <header>
   <div>
     <h1>Inbound Call Center Script</h1>
-    <div class="subtitle">iGrant Marketing Services Inc. • Interactive inbound agent guide</div>
+    <div class="subtitle">KAIZEN • Interactive inbound agent guide</div>
   </div>
   <button class="secondary" id="restartBtn" type="button">Restart Call</button>
 </header>
@@ -213,7 +213,7 @@ footer{display:none}
     <button class="danger" type="button" data-dq="Caller is not interested in Disability Benefits.">No — DQ</button>
   </div>
   <div class="nav">
-    <button class="secondary" type="button" disabled style="opacity:.45;cursor:not-allowed">Back</button>
+    <button class="secondary" type="button" disabled aria-disabled="true" style="opacity:.45;cursor:not-allowed">Back</button>
     <span></span>
   </div>
 </section>
@@ -361,9 +361,9 @@ footer{display:none}
     current = Number(number);
     dqScreen.classList.add('hidden');
 
-    steps.forEach(step => {
-      step.classList.toggle('active', Number(step.dataset.step) === current);
-    });
+    steps.forEach(step => step.classList.remove('active'));
+    const target = steps.find(step => Number(step.dataset.step) === current);
+    if (target) target.classList.add('active');
 
     // 10 total workflow steps, with the last step at 100%.
     const pct = ((current - 1) / (steps.length - 1)) * 100;
@@ -478,24 +478,30 @@ footer{display:none}
     yearsEl.appendChild(label);
   }
 
-  // Universal navigation.
-  root.addEventListener('click', function (event) {
-    const button = event.target.closest('button');
-    if (!button) return;
 
-    if (button.dataset.dq) {
-      showDQ(button.dataset.dq);
-      return;
-    }
-
-    if (button.dataset.prev) {
+  // Explicit navigation handlers — each Back button always returns to the prior step.
+  root.querySelectorAll('button[data-prev]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
       showStep(Math.max(1, current - 1));
-      return;
-    }
+    });
+  });
 
-    if (button.dataset.next) {
+  root.querySelectorAll('button[data-next]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
       showStep(Number(button.dataset.next));
-    }
+    });
+  });
+
+  root.querySelectorAll('button[data-dq]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      showDQ(button.dataset.dq);
+    });
   });
 
   document.getElementById('yearsNext').addEventListener('click', function () {
@@ -518,7 +524,8 @@ footer{display:none}
     if (doctorConfirmed && medConfirmed) showStep(9);
   });
 
-  document.getElementById('dqBack').addEventListener('click', function () {
+  document.getElementById('dqBack').addEventListener('click', function (event) {
+    event.preventDefault();
     showStep(dqFromStep);
   });
 
