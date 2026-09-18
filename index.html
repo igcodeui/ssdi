@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iGrant | Inbound Call Script</title>
+<style>
+:root{
+  --navy-950:#04111d;
+  --navy-900:#061827;
+  --navy-850:#082033;
+  --navy-800:#0b2940;
+  --line:#163f5b;
+  --line-soft:rgba(67,151,194,.18);
+  --text:#edf5fa;
+  --muted:#8da6b7;
+  --cyan:#39b8ee;
+  --cyan-strong:#1e9fd5;
+  --green:#2bc58a;
+  --green-bg:rgba(43,197,138,.10);
+  --red:#f06b74;
+  --red-bg:rgba(240,107,116,.10);
+}
+*{box-sizing:border-box}
+html{background:var(--navy-950)}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(900px 420px at 82% -10%,rgba(42,156,207,.13),transparent 62%),
+    linear-gradient(180deg,var(--navy-900),var(--navy-950));
+  min-height:100vh;
+}
+.app{max-width:960px;margin:0 auto;padding:32px 28px 42px}
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  margin-bottom:28px;padding-bottom:22px;
+  border-bottom:1px solid var(--line-soft)
+}
+header:before{
+  content:"iGrant";
+  display:block;
+  color:var(--cyan);
+  font-weight:900;
+  font-size:25px;
+  letter-spacing:-.05em;
+  margin-right:4px
+}
+header>div{flex:1}
+h1{
+  margin:0 0 5px;font-size:23px;line-height:1.15;
+  letter-spacing:-.025em;font-weight:750
+}
+.subtitle{
+  color:var(--muted);font-size:12px;letter-spacing:.01em
+}
+#restartBtn{
+  min-width:118px;
+  background:transparent;color:#cfe4ef;border:1px solid #24516d
+}
+#restartBtn:hover{background:#0b2940;border-color:#347394}
+.progress-wrap{margin:0 0 24px}
+.progress-line{
+  height:5px;background:#0b2a40;border-radius:99px;overflow:hidden
+}
+.progress{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--cyan-strong),var(--cyan));
+  transition:width .22s ease
+}
+.progress-text{
+  display:flex;justify-content:space-between;
+  color:var(--muted);font-size:11px;margin-top:8px;
+  text-transform:uppercase;letter-spacing:.07em
+}
+.card{
+  background:linear-gradient(145deg,rgba(11,41,64,.96),rgba(7,29,45,.98));
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:26px;
+  box-shadow:0 12px 34px rgba(0,0,0,.15);
+  margin-bottom:16px
+}
+.step-head{
+  display:flex;align-items:flex-start;gap:14px;
+  padding-bottom:15px;border-bottom:1px solid var(--line-soft);
+  margin-bottom:18px
+}
+.step-head:before{
+  content:"";
+  width:3px;height:38px;flex:0 0 3px;border-radius:5px;
+  background:var(--cyan)
+}
+.step-num{
+  color:#67c8ee;font-size:10px;font-weight:850;
+  text-transform:uppercase;letter-spacing:.13em
+}
+h2{
+  margin:4px 0 0;font-size:21px;font-weight:720;
+  letter-spacing:-.02em
+}
+.prompt{font-size:16px;line-height:1.6;margin:14px 0 18px}
+.script{
+  background:rgba(3,16,27,.72);
+  border:1px solid rgba(48,111,146,.55);
+  border-left:3px solid var(--cyan);
+  padding:17px 18px;border-radius:8px;
+  line-height:1.7;margin:14px 0 20px;
+  color:#e5f0f6
+}
+.note{font-size:12px;color:var(--muted);line-height:1.55}
+.choice-row{display:flex;flex-wrap:wrap;gap:10px}
+button{
+  border:1px solid transparent;border-radius:8px;
+  padding:10px 15px;min-height:44px;
+  font:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;transition:background .15s,border-color .15s,transform .15s;
+}
+button:hover:not(:disabled){transform:translateY(-1px)}
+button:disabled{cursor:not-allowed}
+.primary{background:var(--cyan);color:#04131e}
+.primary:hover:not(:disabled){background:#57c5f1}
+.secondary{
+  background:#0b2940;color:#d7e7ef;border-color:#1c4b67
+}
+.secondary:hover:not(:disabled){background:#0f344e;border-color:#2c6381}
+.success{background:#126a4d;color:#eafff7;border-color:#1d8d68}
+.success:hover:not(:disabled){background:#16805e}
+.danger{background:#742b37;color:#fff0f2;border-color:#963b49}
+.danger:hover:not(:disabled){background:#8a3240}
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-top:22px;padding-top:17px;
+  border-top:1px solid var(--line-soft)
+}
+.callout{
+  border-radius:8px;padding:14px 16px;margin:15px 0;
+  font-size:13px;line-height:1.55
+}
+.callout.dq{
+  background:var(--red-bg);border:1px solid rgba(240,107,116,.35);color:#ffc0c6
+}
+.callout.ok{
+  background:var(--green-bg);border:1px solid rgba(43,197,138,.32);color:#a9ebd1
+}
+.years{
+  display:grid;grid-template-columns:repeat(5,minmax(70px,1fr));
+  gap:8px;margin:17px 0
+}
+.year{
+  border:1px solid #1b4b67;border-radius:8px;
+  padding:12px 8px;text-align:center;
+  background:#081f31;color:#cfe2ec;cursor:pointer;
+  font-size:13px;font-weight:700
+}
+.year:hover{border-color:#2a6b8e}
+.year input{width:auto;margin-right:5px;accent-color:var(--cyan)}
+.year.selected{
+  border-color:var(--cyan);background:#0a3049;
+  box-shadow:inset 0 0 0 1px rgba(57,184,238,.15)
+}
+.counter{
+  font-size:13px;font-weight:800;color:#dcecf4;margin-top:5px
+}
+.hidden{display:none!important}
+.summary{
+  white-space:pre-wrap;background:#03111c;color:#cfe5ef;
+  border:1px solid #153d57;border-radius:8px;padding:16px;
+  line-height:1.55;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px
+}
+footer{display:none}
+@media(max-width:700px){
+  .app{padding:22px 14px 32px}
+  header{flex-wrap:wrap}
+  header:before{order:0}
+  header>div{order:1;flex-basis:calc(100% - 70px)}
+  #restartBtn{order:2}
+  .card{padding:20px}
+  .years{grid-template-columns:repeat(2,1fr)}
+  .nav{align-items:stretch}
+}
+
+/* Call-flow visibility: only the active step is shown. */
+.step{display:none}
+.step.active{display:block}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<header>
+  <div>
+    <h1>Inbound Call Center Script</h1>
+    <div class="subtitle">iGrant Marketing Services Inc. • Interactive inbound agent guide</div>
+  </div>
+  <button class="secondary" id="restartBtn" type="button">Restart Call</button>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-line"><div class="progress" id="progress"></div></div>
+  <div class="progress-text"><span id="progressLabel">Step 1 of 9</span><span id="statusLabel">In progress</span></div>
+</div>
+
+<main>
+<section class="card step active" data-step="1">
+  <div class="step-head"><div><div class="step-num">Opening</div><h2>Introduction</h2></div></div>
+  <div class="script">Hi, this is <strong>[Agent Name]</strong>. Who do I have the pleasure of speaking with?</div>
+  <div class="script">Nice to meet you! So, I understand you're interested in getting Disability Benefits.</div>
+  <p class="prompt">Is the caller interested in getting Disability Benefits?</p>
+  <div class="choice-row">
+    <button class="success" type="button" data-choice="yes" data-next="2">Yes — Continue</button>
+    <button class="danger" type="button" data-dq="Caller is not interested in Disability Benefits.">No — DQ</button>
+  </div>
+  <div class="nav">
+    <button class="secondary" type="button" disabled style="opacity:.45;cursor:not-allowed">Back</button>
+    <span></span>
+  </div>
+</section>
+
+<section class="card step" data-step="2">
+  <div class="step-head"><div><div class="step-num">Who We Are</div><h2>Set Expectations</h2></div></div>
+  <div class="script">We help people qualify for Disability Benefits. I am going to ask you a few brief questions to see if you may qualify.</div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><button class="primary" type="button" data-next="3">Continue</button></div>
+</section>
+
+<section class="card step" data-step="3">
+  <div class="step-head"><div><div class="step-num">Question 1</div><h2>Age</h2></div></div>
+  <div class="script">Can you please tell me how old you are?</div>
+  <p class="note">No typing needed. Select the caller's age group:</p>
+  <div class="choice-row">
+    <button class="danger" type="button" data-dq="Caller is under 50.">Under 50 — DQ</button>
+    <button class="success" type="button" data-next="4">50–66 — Continue</button>
+    <button class="danger" type="button" data-dq="Caller is over 66.">Over 66 — DQ</button>
+  </div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><span></span></div>
+</section>
+
+<section class="card step" data-step="4">
+  <div class="step-head"><div><div class="step-num">Question 2</div><h2>Last Day Worked</h2></div></div>
+  <div class="script">Can you tell me the last day you worked? If prior to 2022-DQ. If currently working-DQ.</div>
+  <p class="note">No typing needed. Select the answer that matches what the caller tells you:</p>
+  <div class="choice-row">
+    <button class="danger" type="button" data-dq="Caller is currently working.">Currently Working — DQ</button>
+    <button class="danger" type="button" data-dq="Caller last worked prior to 2022.">Last Worked Before 2022 — DQ</button>
+    <button class="success" type="button" data-next="5">Last Worked in 2022 or Later — Continue</button>
+  </div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><span></span></div>
+</section>
+
+<section class="card step" data-step="5">
+  <div class="step-head"><div><div class="step-num">Question 3</div><h2>Work History by Year</h2></div></div>
+  <div class="script">From the (date they gave you of the last time they worked) I am going to read off years and tell me if you worked any part of these years?</div>
+  <div class="years" id="years"></div>
+  <div class="counter"><span id="yearCount">0</span> years checked</div>
+  <p class="note">As they read off each year, place a mark next to the year. After getting through 2026, if there are less than 5 boxes checked — DQ. If 5 or more boxes are checked — continue.</p>
+  <div id="yearResult" class="callout hidden" aria-live="polite"></div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><button class="primary" type="button" id="yearsNext">Continue</button></div>
+</section>
+
+<section class="card step" data-step="6">
+  <div class="step-head"><div><div class="step-num">Question 4</div><h2>Attorney Representation</h2></div></div>
+  <div class="script">Do you currently have an attorney representing you in a disability claim?</div>
+  <div class="choice-row">
+    <button class="danger" type="button" data-dq="Caller currently has an attorney representing them in a disability claim.">Yes — DQ</button>
+    <button class="success" type="button" data-next="7">No — Continue</button>
+  </div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><span></span></div>
+</section>
+
+<section class="card step" data-step="7">
+  <div class="step-head"><div><div class="step-num">Question 5</div><h2>Current Social Security Benefits</h2></div></div>
+  <div class="script">Are you currently receiving any type of Social Security Benefits, like SSI or Early Retirement?</div>
+  <div class="choice-row">
+    <button class="danger" type="button" data-dq="Caller is currently receiving Social Security Benefits.">Yes — DQ</button>
+    <button class="success" type="button" data-next="8">No — Continue</button>
+  </div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><span></span></div>
+</section>
+
+<section class="card step" data-step="8">
+  <div class="step-head"><div><div class="step-num">Question 6</div><h2>Doctors & Medication</h2></div></div>
+  <div class="script">I understand that you are unable to work currently because of medical conditions. Please tell me if you are seeing doctors about your conditions and on any medications?</div>
+  <p class="note">Must be seeing at least 1 doctor and on at least 1 medication to continue.</p>
+  <p class="note">No typing needed. Both requirements must be answered “Yes” to continue.</p>
+  <div class="grid">
+    <div class="card" style="margin:0;padding:16px">
+      <strong>Seeing at least 1 doctor?</strong>
+      <div class="choice-row" style="margin-top:12px">
+        <button class="success" type="button" id="doctorYes">Yes</button>
+        <button class="danger" type="button" data-dq="Caller is not seeing at least 1 doctor.">No — DQ</button>
+      </div>
+    </div>
+    <div class="card" style="margin:0;padding:16px">
+      <strong>On at least 1 medication?</strong>
+      <div class="choice-row" style="margin-top:12px">
+        <button class="success" type="button" id="medYes">Yes</button>
+        <button class="danger" type="button" data-dq="Caller is not on at least 1 medication.">No — DQ</button>
+      </div>
+    </div>
+  </div>
+  <div id="medicalResult" class="callout hidden" aria-live="polite"></div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><button class="primary" type="button" id="medicalNext" disabled style="opacity:.5;cursor:not-allowed">Continue</button></div>
+</section>
+
+<section class="card step" data-step="9">
+  <div class="step-head"><div><div class="step-num">Question 7</div><h2>Physical Conditions</h2></div></div>
+  <div class="script">Please tell me what is going on physically and why you feel like you can’t work anymore?</div>
+  <div class="callout ok">
+    <strong>Agent action:</strong> Listen to the caller's physical conditions and record them in Law Ruler. There is no wrong or right answer.
+  </div>
+  <button class="primary" type="button" data-next="10">I Recorded the Conditions — Continue</button>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><span></span></div>
+</section>
+
+<section class="card step" data-step="10">
+  <div class="step-head"><div><div class="step-num">Question 8 • Transfer</div><h2>Patch Through to the Law Firm</h2></div></div>
+  <div class="script">Ok thank you for that information I am going to patch you through to the law firm to do a quick 5-minute review with you. The firm I am patching you through too is Social Security Disability Attorney, PLLC, they have years of experience in disability claims. Some of the benefits they’ve helped others receive are substantial backpay amounts sometimes in the tens of thousands of dollars. They’ve also helped clients receive a steady monthly disability amount up to $4,152 per month and many clients also become eligible for Medicare. There are no upfront costs associated with this service. They can discuss these benefits in more detail so please hold on while I transfer the call.</div>
+  <div class="callout ok"><strong>Before transferring:</strong> Make sure all the information is in Law Ruler.</div>
+  <div class="grid">
+    <label><input id="lawRuler" type="checkbox"> All information entered in Law Ruler</label>
+    <label><input id="transferReady" type="checkbox"> Ready to transfer the call</label>
+  </div>
+  <div class="nav"><button class="secondary" type="button" data-prev>Back</button><button class="success" type="button" id="finishBtn">Complete Call</button></div>
+</section>
+
+<section class="card hidden" id="dqScreen">
+  <div class="callout dq"><strong>DQ — Do not continue the script.</strong><div id="dqReason" style="margin-top:6px"></div></div>
+  <div class="nav">
+    <button class="secondary" type="button" id="dqBack">Back — I Misclicked</button>
+    <button class="primary" type="button" id="dqRestart">Start New Call</button>
+  </div>
+</section>
+</main>
+
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const root = document.getElementById('app');
+  const steps = Array.from(root.querySelectorAll('.step'));
+  const progress = document.getElementById('progress');
+  const progressLabel = document.getElementById('progressLabel');
+  const statusLabel = document.getElementById('statusLabel');
+  const dqScreen = document.getElementById('dqScreen');
+
+  let current = 1;
+  let dqFromStep = 1;
+  let doctorConfirmed = false;
+  let medConfirmed = false;
+  const years = new Set();
+
+  function scrollTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showStep(number) {
+    current = Number(number);
+    dqScreen.classList.add('hidden');
+
+    steps.forEach(step => {
+      step.classList.toggle('active', Number(step.dataset.step) === current);
+    });
+
+    // 10 total workflow steps, with the last step at 100%.
+    const pct = ((current - 1) / (steps.length - 1)) * 100;
+    progress.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    progressLabel.textContent = 'Step ' + current + ' of ' + steps.length;
+    statusLabel.textContent = current === steps.length ? 'Ready to transfer' : 'In progress';
+    scrollTop();
+  }
+
+  function showDQ(reason) {
+    dqFromStep = current;
+    steps.forEach(step => step.classList.remove('active'));
+    dqScreen.classList.remove('hidden');
+
+    document.getElementById('dqReason').textContent = reason;
+    progress.style.width = '100%';
+    progressLabel.textContent = 'DQ';
+    statusLabel.textContent = 'Do not continue';
+    scrollTop();
+  }
+
+  function updateYears() {
+    document.getElementById('yearCount').textContent = years.size;
+
+    root.querySelectorAll('.year').forEach(label => {
+      const year = Number(label.dataset.year);
+      const checked = years.has(year);
+      label.classList.toggle('selected', checked);
+      const checkbox = label.querySelector('input');
+      if (checkbox) checkbox.checked = checked;
+    });
+  }
+
+  function validateYears() {
+    const count = years.size;
+    const result = document.getElementById('yearResult');
+
+    if (count < 5) {
+      result.className = 'callout dq';
+      result.textContent = 'Fewer than 5 work-history years were checked — DQ.';
+      showDQ('Fewer than 5 work-history years were checked.');
+      return false;
+    }
+
+    result.className = 'callout ok';
+    result.textContent = count + ' years checked — continue.';
+    return true;
+  }
+
+  function updateMedical() {
+    const button = document.getElementById('medicalNext');
+    const result = document.getElementById('medicalResult');
+    const ready = doctorConfirmed && medConfirmed;
+
+    button.disabled = !ready;
+    button.style.opacity = ready ? '1' : '.5';
+    button.style.cursor = ready ? 'pointer' : 'not-allowed';
+
+    if (ready) {
+      result.className = 'callout ok';
+      result.textContent = 'Both medical requirements confirmed — continue.';
+    } else {
+      result.className = 'callout hidden';
+      result.textContent = '';
+    }
+  }
+
+  function reset() {
+    current = 1;
+    dqFromStep = 1;
+    years.clear();
+    doctorConfirmed = false;
+    medConfirmed = false;
+
+    root.querySelectorAll('input, textarea, select').forEach(el => {
+      if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+    });
+
+    document.getElementById('doctorYes').textContent = 'Yes';
+    document.getElementById('medYes').textContent = 'Yes';
+
+    updateYears();
+    updateMedical();
+    showStep(1);
+  }
+
+  // Build the 2017–2026 year buttons.
+  const yearsEl = document.getElementById('years');
+  for (let year = 2017; year <= 2026; year++) {
+    const label = document.createElement('label');
+    label.className = 'year';
+    label.dataset.year = year;
+    label.innerHTML = '<input type="checkbox" aria-label="Worked in ' + year + '"> ' + year;
+
+    const checkbox = label.querySelector('input');
+
+    label.addEventListener('click', function (event) {
+      if (event.target === checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      if (checkbox.checked) years.add(year);
+      else years.delete(year);
+      updateYears();
+    });
+
+    checkbox.addEventListener('change', function () {
+      if (checkbox.checked) years.add(year);
+      else years.delete(year);
+      updateYears();
+    });
+
+    yearsEl.appendChild(label);
+  }
+
+  // Universal navigation.
+  root.addEventListener('click', function (event) {
+    const button = event.target.closest('button');
+    if (!button) return;
+
+    if (button.dataset.dq) {
+      showDQ(button.dataset.dq);
+      return;
+    }
+
+    if (button.dataset.prev) {
+      showStep(Math.max(1, current - 1));
+      return;
+    }
+
+    if (button.dataset.next) {
+      showStep(Number(button.dataset.next));
+    }
+  });
+
+  document.getElementById('yearsNext').addEventListener('click', function () {
+    if (validateYears()) showStep(6);
+  });
+
+  document.getElementById('doctorYes').addEventListener('click', function () {
+    doctorConfirmed = true;
+    this.textContent = 'Yes ✓';
+    updateMedical();
+  });
+
+  document.getElementById('medYes').addEventListener('click', function () {
+    medConfirmed = true;
+    this.textContent = 'Yes ✓';
+    updateMedical();
+  });
+
+  document.getElementById('medicalNext').addEventListener('click', function () {
+    if (doctorConfirmed && medConfirmed) showStep(9);
+  });
+
+  document.getElementById('dqBack').addEventListener('click', function () {
+    showStep(dqFromStep);
+  });
+
+  document.getElementById('dqRestart').addEventListener('click', reset);
+  document.getElementById('restartBtn').addEventListener('click', reset);
+
+  // Final step: complete the call, then automatically start a fresh call.
+  document.getElementById('finishBtn').addEventListener('click', function () {
+    const lawRuler = document.getElementById('lawRuler').checked;
+    const transferReady = document.getElementById('transferReady').checked;
+
+    if (!lawRuler || !transferReady) {
+      alert('Please confirm both: all information is in Law Ruler and the call is ready to transfer.');
+      return;
+    }
+
+    const button = this;
+    button.textContent = 'Call Complete ✓';
+    button.disabled = true;
+    statusLabel.textContent = 'Call completed — starting new call';
+    progress.style.width = '100%';
+
+    setTimeout(function () {
+      reset();
+    }, 650);
+  });
+
+  // Start clean.
+  updateYears();
+  updateMedical();
+  showStep(1);
+})();
+</script>
+</body>
+</html>
