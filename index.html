@@ -479,15 +479,6 @@ footer{display:none}
   }
 
 
-  // Explicit navigation handlers — each Back button always returns to the prior step.
-  root.querySelectorAll('button[data-prev]').forEach(function (button) {
-    button.addEventListener('click', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      showStep(Math.max(1, current - 1));
-    });
-  });
-
   root.querySelectorAll('button[data-next]').forEach(function (button) {
     button.addEventListener('click', function (event) {
       event.preventDefault();
@@ -502,6 +493,16 @@ footer{display:none}
       event.stopPropagation();
       showDQ(button.dataset.dq);
     });
+  });
+
+  // Back buttons: explicit, reliable, one-step navigation.
+  root.querySelectorAll('button[data-prev]').forEach(function (button) {
+    button.onclick = function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!button.disabled) showStep(Math.max(1, current - 1));
+      return false;
+    };
   });
 
   document.getElementById('yearsNext').addEventListener('click', function () {
@@ -524,23 +525,20 @@ footer{display:none}
     if (doctorConfirmed && medConfirmed) showStep(9);
   });
 
-  document.getElementById('dqBack').addEventListener('click', function (event) {
+  document.getElementById('dqBack').onclick = function (event) {
     event.preventDefault();
+    event.stopPropagation();
     showStep(dqFromStep);
-  });
+    return false;
+  };
 
   document.getElementById('dqRestart').addEventListener('click', reset);
   document.getElementById('restartBtn').addEventListener('click', reset);
 
-  // Final step: complete the call, then automatically start a fresh call.
-  document.getElementById('finishBtn').addEventListener('click', function () {
-    const lawRuler = document.getElementById('lawRuler').checked;
-    const transferReady = document.getElementById('transferReady').checked;
-
-    if (!lawRuler || !transferReady) {
-      alert('Please confirm both: all information is in Law Ruler and the call is ready to transfer.');
-      return;
-    }
+  // Final step: Complete Call always starts a fresh call.
+  document.getElementById('finishBtn').addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
 
     const button = this;
     button.textContent = 'Call Complete ✓';
@@ -550,7 +548,9 @@ footer{display:none}
 
     setTimeout(function () {
       reset();
-    }, 650);
+      button.textContent = 'Complete Call';
+      button.disabled = false;
+    }, 450);
   });
 
   // Start clean.
